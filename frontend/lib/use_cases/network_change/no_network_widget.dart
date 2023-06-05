@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:simple_todo_app/uses_cases/network_change/network_change_manager.dart';
+
+import 'network_change_manager.dart';
 
 class NoNetworkWidget extends StatefulWidget {
-  const NoNetworkWidget({Key? key}) : super(key: key);
+  const NoNetworkWidget({super.key});
 
   @override
   State<NoNetworkWidget> createState() => _NoNetworkWidgetState();
@@ -19,9 +20,7 @@ class _NoNetworkWidgetState extends State<NoNetworkWidget> {
     super.initState();
     _networkChangeManager = NetworkChangeManager();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      _networkChangeManager.handleNetworkChange((result) {
-        _updateView(result);
-      });
+      _networkChangeManager.handleNetworkChange(_updateView);
     });
   }
 
@@ -37,10 +36,10 @@ class _NoNetworkWidgetState extends State<NoNetworkWidget> {
       firstChild: Container(
         height: 50.h,
         color: Theme.of(context).colorScheme.primary,
-        padding: const EdgeInsets.only(bottom: 12.0),
+        padding: const EdgeInsets.only(bottom: 12),
         child: Center(
           child: Text(
-            'No network detected.',
+            'Oops. Você não está conectado à internet!',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -50,7 +49,9 @@ class _NoNetworkWidgetState extends State<NoNetworkWidget> {
         ),
       ),
       secondChild: const SizedBox(),
-      crossFadeState: _networkConnection == NetworkConnection.off ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      crossFadeState: _networkConnection == NetworkConnection.off
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
       duration: const Duration(milliseconds: 200),
     );
   }

@@ -1,4 +1,4 @@
-package com.example.simple_todo_app
+package br.edu.utfpr.medianeira
 
 import io.flutter.embedding.android.FlutterActivity
 

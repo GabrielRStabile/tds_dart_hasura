@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_todo_app/models/todo_model.dart';
-import 'package:simple_todo_app/project_utils.dart';
-import 'package:simple_todo_app/view_models/home_view_model.dart';
-import 'package:simple_todo_app/widgets/add_todo_sheet.dart';
-import 'package:simple_todo_app/widgets/edit_todo_sheet.dart';
-import 'package:simple_todo_app/widgets/empty_state_widget.dart';
-import 'package:simple_todo_app/widgets/todo_card.dart';
+
+import '../helpers/user_id_helper.dart';
+import '../models/todo_model.dart';
+import '../project_utils.dart';
+import '../view_models/home_view_model.dart';
+import '../widgets/add_todo_sheet.dart';
+import '../widgets/edit_todo_sheet.dart';
+import '../widgets/empty_state_widget.dart';
+import '../widgets/todo_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,13 +19,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void _showToast(BuildContext context, String message) => fToast.showToast(child: ProjectUtils.toastWidget(context, message));
+  void _showToast(BuildContext context, String message) =>
+      fToast.showToast(child: ProjectUtils.toastWidget(context, message));
   late FToast fToast;
 
   void getTodos() async {
-    String responseMessage = await context.read<HomeViewModel>().getTodos();
+    String userId = await UserIdHelper.getDeviceIdentifier();
+    String responseMessage =
+        await context.read<HomeViewModel>().getTodos(userId);
     if (responseMessage != 'Success') {
-      if (mounted) _showToast(context, 'Error while getting todos from server.');
+      if (mounted)
+        _showToast(
+          context,
+          'Ocorreu um erro enquanto procuravamos suas tarefas.',
+        );
     }
   }
 
@@ -57,8 +66,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  showAddTodoModalBottomSheet(BuildContext context) async => showModalBottomSheet(
+  void showAddTodoModalBottomSheet(BuildContext context) async =>
+      showModalBottomSheet<void>(
         context: context,
+        isScrollControlled: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(16.0),
@@ -67,7 +78,8 @@ class _HomePageState extends State<HomePage> {
         ),
         builder: (context) => AddTodoSheet(
           addTodoCallback: ((todoModel) async {
-            String response = await context.read<HomeViewModel>().addTodo(todoModel);
+            String response =
+                await context.read<HomeViewModel>().addTodo(todoModel);
             if (response == 'Success' && mounted) {
               Navigator.pop(context);
               return true;
@@ -87,7 +99,7 @@ class _HomePageState extends State<HomePage> {
         itemCount: context.watch<HomeViewModel>().mainTodos?.length,
         itemBuilder: (context, index) => TodoCard(
           todoModel: context.watch<HomeViewModel>().mainTodos![index],
-          onTappedCallback: (TodoModel todoModel) => showModalBottomSheet(
+          onTappedCallback: (TodoModel todoModel) => showModalBottomSheet<void>(
             context: context,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
@@ -96,15 +108,21 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             builder: (context) => EditTodoSheet(
-              todoModel: TodoModel.copyFrom(context.read<HomeViewModel>().mainTodos![index]),
+              todoModel: context.read<HomeViewModel>().mainTodos![index],
               editTodoCallback: (TodoModel model) async {
-                await context.read<HomeViewModel>().editTodo(model).then((response) async {
+                await context
+                    .read<HomeViewModel>()
+                    .editTodo(model)
+                    .then((response) async {
                   if (response == 'Success') return true;
                 });
                 return false;
               },
               deleteTodoCallback: (TodoModel model) async {
-                await context.read<HomeViewModel>().deleteTodo(model).then((response) async {
+                await context
+                    .read<HomeViewModel>()
+                    .deleteTodo(model)
+                    .then((response) async {
                   if (response == 'Success') return true;
                 });
                 return false;
@@ -112,9 +130,15 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           onCheckedCallback: (bool val) async {
-            await context.read<HomeViewModel>().todoCardOnCheckedCallback(val, index).then((response) {
+            await context
+                .read<HomeViewModel>()
+                .todoCardOnCheckedCallback(val, index)
+                .then((response) {
               if (!response && mounted) {
-                _showToast(context, 'Error editing todo.');
+                _showToast(
+                  context,
+                  'Ocorreu um erro ao tentarmos adicionar sua tarefa.',
+                );
                 return false;
               }
             });

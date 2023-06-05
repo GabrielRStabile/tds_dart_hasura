@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:numberpicker/numberpicker.dart';
-import 'package:simple_todo_app/models/todo_model.dart';
-import 'package:simple_todo_app/project_utils.dart';
+
+import '../models/todo_model.dart';
+import '../project_utils.dart';
 
 class EditTodoSheet extends StatefulWidget {
   final TodoModel todoModel;
@@ -21,7 +22,8 @@ class EditTodoSheet extends StatefulWidget {
 }
 
 class _EditTodoSheetState extends State<EditTodoSheet> {
-  void _showToast(BuildContext context, String message) => fToast.showToast(child: ProjectUtils.toastWidget(context, message));
+  void _showToast(BuildContext context, String message) =>
+      fToast.showToast(child: ProjectUtils.toastWidget(context, message));
 
   late FToast fToast;
 
@@ -81,7 +83,7 @@ class _EditTodoSheetState extends State<EditTodoSheet> {
               ),
             ),
             Text(
-              'from highest to lowest',
+              'mais prioritárias para baixo',
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Theme.of(context).colorScheme.primary,
@@ -111,10 +113,20 @@ class _EditTodoSheetState extends State<EditTodoSheet> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        Theme.of(context).colorScheme.primaryContainer,
+                      ),
+                    ),
                     onPressed: () async {
                       await _editTodoOnPressed(context);
                     },
-                    label: const Text('Salvar'),
+                    label: Text(
+                      'Salvar',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
                     icon: const Icon(Icons.edit),
                   ),
                 ),
@@ -122,12 +134,19 @@ class _EditTodoSheetState extends State<EditTodoSheet> {
                 Expanded(
                   child: ElevatedButton.icon(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.red),
+                      backgroundColor: MaterialStateProperty.all(
+                        Theme.of(context).colorScheme.error,
+                      ),
                     ),
                     onPressed: () async {
                       await _deleteTodoOnPressed(context);
                     },
-                    label: const Text('Apagar'),
+                    label: Text(
+                      'Apagar',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
+                    ),
                     icon: const Icon(Icons.delete),
                   ),
                 ),
@@ -164,14 +183,8 @@ class _EditTodoSheetState extends State<EditTodoSheet> {
     setState(() {
       _isLoading = true;
     });
-    bool response = await widget.deleteTodoCallback(widget.todoModel);
-    if (response && mounted) {
-      Navigator.pop(context);
-    } else {
-      _showToast(context, 'Error while deleting todo.');
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    await widget.deleteTodoCallback(widget.todoModel);
+
+    Navigator.pop(context);
   }
 }

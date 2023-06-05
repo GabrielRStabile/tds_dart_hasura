@@ -48,6 +48,4 @@ class ProjectConstants {
       brightness: Brightness.dark,
     ),
   );
-
-  static const String dbHttpLink = 'https://famous-swine-77.hasura.app/v1/graphql';
 }

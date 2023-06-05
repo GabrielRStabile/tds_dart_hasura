@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_todo_app/project_constants.dart';
-import 'package:simple_todo_app/screens/home_page.dart';
-import 'package:simple_todo_app/uses_cases/network_change/no_network_widget.dart';
-import 'package:simple_todo_app/view_models/home_view_model.dart';
+
+import 'project_constants.dart';
+import 'screens/home_page.dart';
+import 'use_cases/network_change/no_network_widget.dart';
+import 'view_models/home_view_model.dart';
 
 void main() {
   runApp(

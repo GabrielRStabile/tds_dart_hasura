@@ -1,117 +1,75 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql/client.dart';
-import 'package:simple_todo_app/helpers/database_helper.dart';
-import 'package:simple_todo_app/models/todo_model.dart';
-import 'package:simple_todo_app/queries.dart';
+
+import '../models/todo_model.dart';
+import '../providers/shelf_provider.dart';
 
 class HomeViewModel with ChangeNotifier {
-  GraphQLClient? client;
-  DatabaseHelper helper = DatabaseHelper();
+  ShelfProvider helper = ShelfProvider();
   List<TodoModel>? mainTodos;
 
-  Future<String> getTodos() async {
-    client ??= helper.getClient();
-    Map<String, dynamic>? response;
+  Future<String> getTodos(String userId) async {
     try {
-      response = await helper.runQuery(client!, Queries.getAllTodosAscQuery);
-    } catch (e) {
-      return e.toString();
-    }
+      final response = await helper.getTodos(userId);
 
-    if (response == null) {
-      return 'Query returned null';
+      if (response.isEmpty) {
+        return 'Query returned null';
+      }
+      mainTodos = response;
+      notifyListeners();
+      return 'Success';
+    } on DioError catch (e) {
+      if (e.response?.statusCode == 404) {
+        mainTodos ??= [];
+        notifyListeners();
+
+        return 'Success';
+      } else {
+        return 'Error';
+      }
     }
-    mainTodos = TodoModel.getTodoListFromJson(response);
-    notifyListeners();
-    return 'Success';
   }
 
   Future<String> addTodo(TodoModel todoModel) async {
-    client ??= helper.getClient();
-    Map<String, dynamic> variables = {
-      'is_done': todoModel.isDone,
-      'todo': todoModel.todo,
-      'priority': todoModel.priority,
-      'user': '07c42a78-d85f-46e8-a98b-2c3d45c3b52b',
-    };
+    final response = await helper.addTodo(
+      todoModel.userId,
+      todoModel.todo,
+      todoModel.priority,
+      todoModel.isDone,
+    );
 
-    Map<String, dynamic>? response;
-    try {
-      response = await helper.runMutation(client!, Queries.addQuery, variables);
-    } catch (e) {
-      return e.toString();
-    }
-
-    if (response == null) {
-      return 'Mutation returned null';
-    }
-    TodoModel newModel = TodoModel.fromJson(response['insert_todos_one']);
     mainTodos ??= [];
-    mainTodos!.add(newModel);
+    mainTodos!.add(response);
     notifyListeners();
     return 'Success';
   }
 
   Future<String> editTodo(TodoModel todoModel) async {
-    client ??= helper.getClient();
-    Map<String, dynamic> variables = {
-      '_eq': todoModel.id,
-      'is_done': todoModel.isDone,
-      'priority': todoModel.priority,
-      'todo': todoModel.todo,
-    };
+    final response = await helper.editTodo(
+      todoModel.id,
+      todoModel.todo,
+      todoModel.priority,
+      todoModel.isDone,
+    );
 
-    Map<String, dynamic>? response;
-    try {
-      response = await helper.runMutation(client!, Queries.editQuery, variables);
-    } catch (e) {
-      return e.toString();
-    }
-
-    if (response == null) {
-      return 'Mutation returned null';
-    }
-
-    try {
-      Map<String, dynamic> json = response['update_todos']['returning'][0];
-      TodoModel newModel = TodoModel.fromJson(json);
-      mainTodos ??= [];
-      mainTodos![mainTodos!.indexWhere((element) => todoModel.id == element.id)] = newModel;
-      notifyListeners();
-      return 'Success';
-    } catch (e) {
-      return 'Mutation returned null, condition may be wrong.';
-    }
+    mainTodos ??= [];
+    mainTodos![mainTodos!.indexWhere((element) => todoModel.id == element.id)] =
+        response;
+    notifyListeners();
+    return 'Success';
   }
 
   Future<String> deleteTodo(TodoModel todoModel) async {
-    client ??= helper.getClient();
-    Map<String, dynamic> variables = {
-      '_eq': todoModel.id,
-    };
+    final response = await helper.deleteTodo(
+      todoModel.id,
+    );
 
-    Map<String, dynamic>? response;
-    try {
-      response = await helper.runMutation(client!, Queries.deleteQuery, variables);
-    } catch (e) {
-      return e.toString();
-    }
-
-    if (response == null) {
-      return 'Mutation returned null';
-    }
-
-    try {
-      Map<String, dynamic> json = response['delete_todos']['returning'][0];
-      mainTodos ??= [];
-      mainTodos!.removeWhere((element) => json['id'] as int == element.id);
-      notifyListeners();
-      return 'Success';
-    } catch (e) {
-      return 'Mutation returned null, condition may be wrong.';
-    }
+    mainTodos ??= [];
+    mainTodos!.removeWhere((element) => todoModel.id == element.id);
+    notifyListeners();
+    return 'Success';
   }
 
   Future<bool> todoCardOnCheckedCallback(bool val, int todoIndex) async {

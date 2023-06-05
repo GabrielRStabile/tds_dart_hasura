@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:numberpicker/numberpicker.dart';
-import 'package:simple_todo_app/models/todo_model.dart';
-import 'package:simple_todo_app/project_utils.dart';
+
+import '../helpers/user_id_helper.dart';
+import '../models/todo_model.dart';
+import '../project_utils.dart';
 
 class AddTodoSheet extends StatefulWidget {
   final Future<bool> Function(TodoModel todoModel) addTodoCallback;
@@ -102,7 +104,7 @@ class _AddTodoSheetState extends State<AddTodoSheet> {
                       id: -1,
                       createdAt: DateTime.now(),
                       todo: todoText,
-                      userId: 'ASD',
+                      userId: await UserIdHelper.getDeviceIdentifier(),
                       isDone: false,
                       priority: todoPriority,
                     );

@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:simple_todo_app/models/todo_model.dart';
-import 'package:simple_todo_app/project_constants.dart';
+
+import '../models/todo_model.dart';
+import '../project_constants.dart';
 
 class TodoCard extends StatefulWidget {
   final TodoModel todoModel;
   final Future<bool> Function(bool val) onCheckedCallback;
-  final Function(TodoModel todoModel) onTappedCallback;
-  const TodoCard({super.key, required this.todoModel, required this.onCheckedCallback, required this.onTappedCallback});
+  final void Function(TodoModel todoModel) onTappedCallback;
+
+  const TodoCard(
+      {super.key,
+      required this.todoModel,
+      required this.onCheckedCallback,
+      required this.onTappedCallback});
 
   @override
   State<TodoCard> createState() => _TodoCardState();
@@ -26,7 +32,8 @@ class _TodoCardState extends State<TodoCard> {
   @override
   Widget build(BuildContext context) {
     Color cardBackgroundColor = ProjectConstants.cardBackgroundColor(context);
-    Color stripColor = ProjectConstants.priorityColor(widget.todoModel.priority);
+    Color stripColor =
+        ProjectConstants.priorityColor(widget.todoModel.priority);
 
     return SizedBox(
       height: 110,
@@ -34,7 +41,8 @@ class _TodoCardState extends State<TodoCard> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: Card(
           clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           elevation: 0,
           color: cardBackgroundColor,
           child: InkWell(
@@ -51,7 +59,8 @@ class _TodoCardState extends State<TodoCard> {
                         children: [
                           Checkbox(
                             checkColor: Colors.white,
-                            fillColor: MaterialStateProperty.all(Theme.of(context).colorScheme.primary),
+                            fillColor: MaterialStateProperty.all(
+                                Theme.of(context).colorScheme.primary),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4.0),
                             ),
@@ -61,7 +70,9 @@ class _TodoCardState extends State<TodoCard> {
                               setState(() {
                                 isChecked = val!;
                               });
-                              await widget.onCheckedCallback(val!).then((response) {
+                              await widget
+                                  .onCheckedCallback(val!)
+                                  .then((response) {
                                 if (!response) {
                                   setState(() {
                                     isChecked = originalState;
@@ -72,7 +83,8 @@ class _TodoCardState extends State<TodoCard> {
                           ),
                           Flexible(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               child: Text(
                                 widget.todoModel.todo,
                                 overflow: TextOverflow.ellipsis,
@@ -85,16 +97,22 @@ class _TodoCardState extends State<TodoCard> {
                         ],
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 12),
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(12.0)),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.15),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(6),
                             child: Text(
-                              DateFormat('dd MMM yyyy').format(widget.todoModel.createdAt),
+                              DateFormat('dd MMM yyyy')
+                                  .format(widget.todoModel.createdAt),
                             ),
                           ),
                         ),

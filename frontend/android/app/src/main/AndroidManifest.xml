@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.simple_todo_app">
+    package="br.edu.utfpr.medianeira">
    <application
-        android:label="simple_todo_app"
+        android:label="tds_dart_hasura_todo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
